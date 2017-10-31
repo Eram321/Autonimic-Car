@@ -7,6 +7,7 @@ public class Car : MonoBehaviour {
 
     //Car Fuzzy control logic
     Fuzzy fuzzy;
+    GameObject usunmnie;
     public GameObject leftRay;
     public GameObject rightRay;
     public GameObject centerRay;
