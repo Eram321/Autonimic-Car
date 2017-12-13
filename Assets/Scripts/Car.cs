@@ -7,53 +7,41 @@ public class Car : MonoBehaviour {
 
     //Car Fuzzy control logic
     Fuzzy fuzzy;
-    GameObject usunmnie;
-    public GameObject leftRay;
-    public GameObject rightRay;
-    public GameObject centerRay;
-
-    float distance = 100;
-    float leftDistance;
-    float rightDistance;
-    float centerDistance;
+    CarView carView;
 
     RaycastHit hit;
 
     //Car Movement Physic
     [SerializeField] float maxCarSpeed = 50f;
-    [SerializeField] float minCarSpeed = 20f;
     [SerializeField] float maxRotationSpeed = 100f;
 
-    [SerializeField] float carSpeedValue = 10f;
-    [SerializeField] float carTurnValue = 1f;
+    [SerializeField] float carSpeedValue = 0f;
+    [SerializeField] float carTurnValue = 0f;
 
     Rigidbody rigibody;
+
+    public bool stop = false;
 
     public void SetRotationSpeed(float h){
         carTurnValue = h;
     }
 
     public void SetSpeed(float v){
-
-        if (v < 20f)
-            carSpeedValue = minCarSpeed / 150;
-        else
-            carSpeedValue = v/150;
+        carSpeedValue = v;
     }
 
     private void Start(){
         rigibody = GetComponent<Rigidbody> ();
-        fuzzy = GameObject.FindObjectOfType<Fuzzy> ();
+        fuzzy = GetComponentInChildren<Fuzzy> ();
+        carView = GetComponent<CarView> ();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        SetDistances ();
+        fuzzy.SetDistances (carView.GetLeft(), carView.GetRight (), carView.GetCenter ());
 
-        fuzzy.SetDistances (leftDistance, rightDistance, centerDistance);
-
-        float h = carTurnValue;
+        float h = carTurnValue*2;
         float v = carSpeedValue;
 
         Move (h, v);
@@ -65,37 +53,12 @@ public class Car : MonoBehaviour {
         rotationVector *= Time.deltaTime * maxRotationSpeed;
 
         Quaternion deltaRotation = Quaternion.Euler (rotationVector);
-        rigibody.MoveRotation (rigibody.rotation * deltaRotation);
+        rigibody.MoveRotation (rigibody.rotation  * deltaRotation);
 
         Vector3 moveVector = (vertical) * transform.forward;
         moveVector *= Time.deltaTime * maxCarSpeed;
 
         moveVector += transform.position;
         rigibody.MovePosition (moveVector);
-    }
-
-    private void SetDistances()
-    {
-        int layerMask = 1 << 8;
-        if (Physics.Raycast (leftRay.transform.position, leftRay.transform.TransformDirection (Vector3.forward), out hit, distance, layerMask))
-        {
-            leftDistance = hit.distance;
-        }
-        else
-            leftDistance = 100;
-
-        if (Physics.Raycast (rightRay.transform.position, rightRay.transform.TransformDirection (Vector3.forward), out hit, distance, layerMask))
-        {
-            rightDistance = hit.distance;
-        }
-        else
-            rightDistance = 100;
-
-        if (Physics.Raycast (centerRay.transform.position, centerRay.transform.TransformDirection (Vector3.forward), out hit, distance, layerMask))
-        {
-            centerDistance = hit.distance;
-        }
-        else
-            centerDistance = 100;
     }
 }
